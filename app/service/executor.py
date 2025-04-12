@@ -1,15 +1,20 @@
+import yaml
 import subprocess
 import tempfile
 import os
 from typing import Tuple
 
+from app.core.settings import AgentConfig
+
 
 class ExecutorService:
 
     def __init__(
-        self
+        self,
+        agent_config: AgentConfig
     ) -> None:
-        pass
+        self._agent_config = agent_config
+        print("Executor initialized")
 
 
     def execute_script(script: str, env_path: str) -> Tuple[str, str]:

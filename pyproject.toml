@@ -24,6 +24,7 @@ requests = "^2.32.3"
 pyjwt = "^2.10.1"
 passlib = "^1.7.4"
 bcrypt = "^4.2.1"
+pyyaml = "^6.0.2"
 
 
 [build-system]

@@ -28,34 +28,8 @@ class S3Settings(AWSSettings):
     S3_BUCKET: str = "highkick-heap"
 
 
-class DBSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="DB_")
-
-    HOST: str = "localhost"
-    PORT: int = 5432
-    USER: str = "postgres"
-    PASSWORD: str = "db-pass"
-    NAME: str = "postgres"
-    POOL_SIZE: int = 5
-    POOL_OVERFLOW: int = 10
-    POOL_RECYCLE: int = 3600
-
-    ECHO: bool = False
-
-    @property
-    def PATH(self) -> str:
-        return f"{self.HOST}:{self.PORT}/{self.NAME}"
-
-    def get_dsn(self, driver: str) -> str:
-        return URL.create(
-            driver,
-            self.USER,
-            self.PASSWORD,
-            self.HOST,
-            self.PORT,
-            self.NAME,
-        ).render_as_string(hide_password=False)
-
+class AgentConfig(BaseSettings):
+    CONFIG_PATH: str = "./"
 
 
 class BedrockClientSettings(BaseSettings):
@@ -94,10 +68,10 @@ class Settings(BaseSettings):
 
     auth: AuthSettings = AuthSettings()
     git: GitSettings = GitSettings()
-    db: DBSettings = DBSettings()
     aws: AWSSettings = AWSSettings()
     bedrock: BedrockClientSettings = BedrockClientSettings()
     s3: S3Settings = S3Settings()
+    agent_config: AgentConfig = AgentConfig()
 
 
 settings = Settings()

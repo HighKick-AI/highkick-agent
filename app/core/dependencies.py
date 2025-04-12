@@ -25,9 +25,11 @@ from app.core.settings import (
     AuthSettings,
     AWSSettings,
     BedrockClientSettings,
-    S3Settings
+    S3Settings,
+    AgentConfig
 )
 from app.schemas.aws import ServiceName
+from app.service.executor import ExecutorService
 
 import jwt
 from jwt.exceptions import InvalidTokenError
@@ -54,15 +56,10 @@ def get_settings(setting_type: type[T]) -> Callable[[Request], T]:
 
     return dependency
 
-
-def _get_db_pool(request: HTTPConnection) -> AsyncEngine:
-    return request.app.state.db_pool
-
-async def get_session(
-    pool: AsyncEngine = Depends(_get_db_pool),
-) -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSession(pool, expire_on_commit=False) as session:
-        yield session
+def get_executor(
+    agent_config: AgentConfig = Depends(get_settings(AgentConfig)),
+) -> ExecutorService:
+    return ExecutorService(agent_config=agent_config)
 
 
 def get_aws_client(service_name: ServiceName, **kwargs: Any) -> Callable:
