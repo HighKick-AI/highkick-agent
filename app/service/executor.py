@@ -14,11 +14,22 @@ class ExecutorService:
         agent_config: AgentConfig
     ) -> None:
         self._agent_config = agent_config
-        print("Executor initialized")
+        self._config_yaml = self._load_config(self._agent_config.CONFIG_PATH)
+        print(self._config_yaml)
+
+        self._python_env = self._config_yaml["python"]["env"]
+        print(self._python_env)
 
 
-    def execute_script(script: str, env_path: str) -> Tuple[str, str]:
-        python_bin = os.path.join(env_path, "bin", "python")
+
+    def _load_config(self, path: str):
+        with open(path, "r") as f:
+            config = yaml.safe_load(f)
+        return config
+
+
+    def execute_script(self, script: str) -> Tuple[str, str]:
+        python_bin = os.path.join(self._python_env, "bin", "python")
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as tmp_file:
             tmp_file.write(script)
