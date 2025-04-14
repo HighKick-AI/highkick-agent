@@ -1,0 +1,26 @@
+python:
+  env: "/Users/leonid/Documents/test/highkick/venv"
+
+secrets:
+  access: "<access_token_secret>"
+  service: "<service_token_secret>"
+
+spark:
+  host: "localhost"
+  port: 3838
+
+databases:
+  - name: "UsersDB"
+    tech: "PostgreSQL"
+    schema:
+      - name: "Table Users"
+        fields:
+          - name: "user name"
+          - age: "age of the user"
+
+  - name: "My Mongo"
+    tech: "Mongo DB"
+    schema:
+      - name: "User playlist document"
+
+
