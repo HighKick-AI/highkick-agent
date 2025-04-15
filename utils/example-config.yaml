@@ -7,20 +7,14 @@ secrets:
 
 spark:
   host: "localhost"
-  port: 3838
+  port: 7077
 
 databases:
   - name: "UsersDB"
     tech: "PostgreSQL"
-    schema:
-      - name: "Table Users"
-        fields:
-          - name: "user name"
-          - age: "age of the user"
-
-  - name: "My Mongo"
-    tech: "Mongo DB"
-    schema:
-      - name: "User playlist document"
-
-
+    vars:
+      - test_db_name: "sparkdb"
+      - test_db_user: "sparkuser"
+      - test_db_password: "sparkpass"
+      - test_db_host: "postgres"
+      - test_db_port: 5432
