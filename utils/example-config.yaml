@@ -13,8 +13,17 @@ databases:
   - name: "UsersDB"
     tech: "PostgreSQL"
     vars:
-      - test_db_name: "sparkdb"
-      - test_db_user: "sparkuser"
-      - test_db_password: "sparkpass"
-      - test_db_host: "postgres"
-      - test_db_port: 5432
+      - test_db1_name: "sparkdb"
+      - test_db1_user: "sparkuser"
+      - test_db1_password: "sparkpass"
+      - test_db1_host: "postgres"
+      - test_db1_port: 5432
+
+  - name: "DashboardsDB"
+    tech: "PostgreSQL"
+    vars:
+      - test_db2_name: "sparkdb_dashboards"
+      - test_db2_user: "sparkuser"
+      - test_db2_password: "sparkpass"
+      - test_db2_host: "postgres"
+      - test_db2_port: 5432

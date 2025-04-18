@@ -28,6 +28,20 @@ class ExecutorService:
         return config
 
 
+    def configure_script(self, script: str) -> str:
+        databases = self._config_yaml["databases"]
+        result = script
+        for db in databases:
+            variables = db["vars"]
+            print(variables)
+            for kv in variables:
+                key = next(iter(kv))
+                val = kv[key]
+                result = result.replace("{{" + key + "}}", str(val))
+
+        return result
+
+
     def execute_script(self, script: str) -> Tuple[str, str]:
         python_bin = os.path.join(self._python_env, "bin", "python")
 
