@@ -38,8 +38,11 @@ async def call_executor(
     script: str = Body(..., media_type="text/plain"),
     executor: ExecutorService = Depends(get_executor),
 ) -> dict:
-    
+    # TODO - substitute {{output_file}} name (RANDOM NAME)
     configured_script = executor.configure_script(script=script)
     executor.execute_script(script=configured_script)
+    # TODO - read output-file to RAM
+    # TODO - delete output-file
 
+    # TODO return <<output file content>>
     return {"hello": configured_script}
