@@ -1,6 +1,9 @@
 python:
   env: "/Users/leonid/Documents/test/highkick/venv"
 
+output:
+  directory: "/Users/leonid/Documents/test/highkick/data"
+
 secrets:
   access: "<access_token_secret>"
   service: "<service_token_secret>"

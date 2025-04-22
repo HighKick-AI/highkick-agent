@@ -7,6 +7,7 @@ from fastapi import (
     Depends,
     Body
 )
+from fastapi.responses import StreamingResponse
 from fastapi import APIRouter, Depends, status, HTTPException, Response
 
 
@@ -24,7 +25,6 @@ router = APIRouter()
 
 @router.post(
     "/script",
-    response_model=dict,
     status_code=status.HTTP_200_OK,
     name="accounts",
     responses={
@@ -37,12 +37,16 @@ router = APIRouter()
 async def call_executor(
     script: str = Body(..., media_type="text/plain"),
     executor: ExecutorService = Depends(get_executor),
-) -> dict:
-    # TODO - substitute {{output_file}} name (RANDOM NAME)
+) -> StreamingResponse:
+    
     configured_script = executor.configure_script(script=script)
-    executor.execute_script(script=configured_script)
-    # TODO - read output-file to RAM
-    # TODO - delete output-file
 
-    # TODO return <<output file content>>
-    return {"hello": configured_script}
+    print(configured_script)
+
+    executor.execute_script(script=configured_script["script"])
+    
+    output_file = configured_script["output_file"]
+    file_stream = open(output_file, mode="rb")
+
+    return StreamingResponse(file_stream, media_type="application/json")
+

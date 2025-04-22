@@ -1,3 +1,4 @@
+import uuid
 import yaml
 import subprocess
 import tempfile
@@ -20,6 +21,9 @@ class ExecutorService:
         self._python_env = self._config_yaml["python"]["env"]
         print(self._python_env)
 
+        self._output_dir = self._config_yaml["output"]["directory"]
+        print(self._output_dir)
+
 
 
     def _load_config(self, path: str):
@@ -39,7 +43,13 @@ class ExecutorService:
                 val = kv[key]
                 result = result.replace("{{" + key + "}}", str(val))
 
-        return result
+        filename = os.path.join(self._output_dir, f"{str(uuid.uuid4())}.json")
+        result = result.replace("{{output_file}}", filename)
+
+        return {
+            "script": result,
+            "output_file": filename
+        }
 
 
     def execute_script(self, script: str) -> Tuple[str, str]:
