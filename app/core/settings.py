@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     SERVICE_NAME: str = "HIGHKICK DASHBOARD"
     SERVICE_VERSION: str = "0.1.0"
     SERVICE_HOST: str = "0.0.0.0"
-    SERVICE_PORT: int = 8085
+    SERVICE_PORT: int = 9900
 
     NUMBER_OF_WORKERS: int = 1
     DEBUG: bool = False
