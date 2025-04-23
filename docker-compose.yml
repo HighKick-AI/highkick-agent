@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: agent_postgres
+    environment:
+      POSTGRES_USER: sparkuser
+      POSTGRES_PASSWORD: sparkpass
+      POSTGRES_DB: sparkdb
+    ports:
+      - "9432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/agent_data
+
+  spark:
+    image: bitnami/spark:latest
+    container_name: agent_spark
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "8080:8080"  # Spark Web UI
+      - "7077:7077"  # Spark Master Port
+    depends_on:
+      - postgres
+
+volumes:
+  pg_data:
+
+
