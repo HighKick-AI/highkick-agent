@@ -24,6 +24,11 @@ class ExecutorService:
         self._output_dir = self._config_yaml["output"]["directory"]
         print(self._output_dir)
 
+        self._spark_host = self._config_yaml["spark"]["host"]
+        print(self._spark_host)
+
+        self._spark_port = self._config_yaml["spark"]["port"]
+        print(self._spark_port)
 
 
     def _load_config(self, path: str):
@@ -45,6 +50,8 @@ class ExecutorService:
 
         filename = os.path.join(self._output_dir, f"{str(uuid.uuid4())}.json")
         result = result.replace("{{output_file}}", filename)
+        result = result.replace("{{spark_host}}", self._spark_host)
+        result = result.replace("{{spark_port}}", self._spark_port)
 
         return {
             "script": result,
