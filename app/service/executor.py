@@ -51,7 +51,7 @@ class ExecutorService:
         filename = os.path.join(self._output_dir, f"{str(uuid.uuid4())}.json")
         result = result.replace("{{output_file}}", filename)
         result = result.replace("{{spark_host}}", self._spark_host)
-        result = result.replace("{{spark_port}}", self._spark_port)
+        result = result.replace("{{spark_port}}", str(self._spark_port))
 
         return {
             "script": result,

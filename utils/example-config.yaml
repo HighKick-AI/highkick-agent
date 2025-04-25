@@ -19,6 +19,6 @@ databases:
       - test_db1_name: "sparkdb"
       - test_db1_user: "sparkuser"
       - test_db1_password: "sparkpass"
-      - test_db1_host: "postgres"
+      - test_db1_host: "localhost"
       - test_db1_port: 9432
 
