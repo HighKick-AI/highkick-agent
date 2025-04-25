@@ -47,10 +47,9 @@ async def call_executor(
 
     executor.execute_script(script=configured_script["script"])
     
-    output_dir = configured_script["output_dir"]
-    output_file = f"{configured_script["output_dir"]}.json"
+    output_file = configured_script["output_file"]
 
-    spark_data_to_file(output_dir, output_file)
+    # spark_data_to_file(output_dir, output_file)
 
     file_stream = open(output_file, mode="rb")
 
