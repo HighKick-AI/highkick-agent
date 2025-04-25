@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import List
+import os
+import shutil
 
 from fastapi import (
     APIRouter,
@@ -45,8 +47,22 @@ async def call_executor(
 
     executor.execute_script(script=configured_script["script"])
     
-    output_file = configured_script["output_file"]
+    output_dir = configured_script["output_dir"]
+    output_file = f"{configured_script["output_dir"]}.json"
+
+    spark_data_to_file(output_dir, output_file)
+
     file_stream = open(output_file, mode="rb")
 
     return StreamingResponse(file_stream, media_type="application/json")
 
+
+def spark_data_to_file(output_dir: str, output_file: str):
+
+    for filename in os.listdir(output_dir):
+        if filename.startswith("part-") and filename.endswith(".json"):
+            part_file = os.path.join(output_dir, filename)
+            shutil.move(part_file, output_file)
+            break
+
+    shutil.rmtree(output_dir, ignore_errors=True)

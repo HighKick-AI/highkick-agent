@@ -48,14 +48,15 @@ class ExecutorService:
                 val = kv[key]
                 result = result.replace("{{" + key + "}}", str(val))
 
-        filename = os.path.join(self._output_dir, f"{str(uuid.uuid4())}.json")
+        ## Name of the spark output directory
+        filename = os.path.join(self._output_dir, f"{str(uuid.uuid4())}")
         result = result.replace("{{output_file}}", filename)
         result = result.replace("{{spark_host}}", self._spark_host)
         result = result.replace("{{spark_port}}", str(self._spark_port))
 
         return {
             "script": result,
-            "output_file": filename
+            "output_dir": filename
         }
 
 
