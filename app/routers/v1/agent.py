@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import List
+import json
 import os
 import shutil
 
@@ -62,7 +63,37 @@ def spark_data_to_file(output_dir: str, output_file: str):
     for filename in os.listdir(output_dir):
         if filename.startswith("part-") and filename.endswith(".json"):
             part_file = os.path.join(output_dir, filename)
-            shutil.move(part_file, output_file)
-            break
+            if validate_json(part_file):
+                shutil.move(part_file, output_file)
+                break
 
     shutil.rmtree(output_dir, ignore_errors=True)
+
+def validate_json(json_data: str) -> bool:
+    try:
+        json.loads(json_data)
+        return True
+    except json.JSONDecodeError:
+        if not json_data or '\n' not in json_data:
+            return False
+            
+        array_json = ['[']
+        first = True
+        
+        for line in json_data.split('\n'):
+            line = line.strip()
+            if line:
+                if not first:
+                    array_json.append(',')
+                array_json.append(line)
+                first = False
+                
+        array_json.append(']')
+        
+        try:
+            json.loads(''.join(array_json))
+            return True
+        except (json.JSONDecodeError, ValueError):
+            pass
+            
+    return False
