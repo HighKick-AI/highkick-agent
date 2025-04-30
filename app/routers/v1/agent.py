@@ -59,13 +59,18 @@ async def call_executor(
 
 
 def spark_data_to_file(output_dir: str, output_file: str):
-
     for filename in os.listdir(output_dir):
         if filename.startswith("part-") and filename.endswith(".json"):
             part_file = os.path.join(output_dir, filename)
-            if validate_json(part_file):
-                shutil.move(part_file, output_file)
-                break
+            try:
+                with open(part_file, 'r') as f:
+                    content = f.read()
+                    if validate_json(content):
+                        shutil.move(part_file, output_file)
+                        break
+            except (IOError, OSError) as e:
+                print(f"Error reading file {part_file}: {str(e)}")
+                continue
 
     shutil.rmtree(output_dir, ignore_errors=True)
 
