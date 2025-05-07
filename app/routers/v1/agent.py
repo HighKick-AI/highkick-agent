@@ -59,46 +59,30 @@ async def call_executor(
 
 
 def spark_data_to_file(output_dir: str, output_file: str):
+    part_files = []
     for filename in os.listdir(output_dir):
         if filename.startswith("part-") and filename.endswith(".json"):
             part_file = os.path.join(output_dir, filename)
             try:
                 with open(part_file, 'r') as f:
                     content = f.read()
-                    if validate_json(content):
-                        shutil.move(part_file, output_file)
-                        break
+                    part_files.append((part_file, content))
             except (IOError, OSError) as e:
                 print(f"Error reading file {part_file}: {str(e)}")
                 continue
 
-    shutil.rmtree(output_dir, ignore_errors=True)
+    if not part_files:
+        return
 
-def validate_json(json_data: str) -> bool:
-    try:
-        json.loads(json_data)
-        return True
-    except json.JSONDecodeError:
-        if not json_data or '\n' not in json_data:
-            return False
-            
-        array_json = ['[']
-        first = True
-        
-        for line in json_data.split('\n'):
-            line = line.strip()
-            if line:
-                if not first:
-                    array_json.append(',')
-                array_json.append(line)
-                first = False
-                
-        array_json.append(']')
-        
-        try:
-            json.loads(''.join(array_json))
-            return True
-        except (json.JSONDecodeError, ValueError):
-            pass
-            
-    return False
+    if len(part_files) == 1:
+        shutil.move(part_files[0][0], output_file)
+    else:
+        with open(output_file, 'w') as outfile:
+            outfile.write('[')
+            for i, (_, content) in enumerate(part_files):
+                if i > 0:
+                    outfile.write(',')
+                outfile.write(content.strip())
+            outfile.write(']')
+
+    shutil.rmtree(output_dir, ignore_errors=True)
