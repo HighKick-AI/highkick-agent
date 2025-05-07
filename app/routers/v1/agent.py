@@ -76,13 +76,14 @@ def spark_data_to_file(output_dir: str, output_file: str):
 
     if len(part_files) == 1:
         with open(output_file, 'w') as outfile:
-            outfile.write('[')
-            for i, (_, content) in enumerate(part_files):
-                if i > 0:
-                    outfile.write(',')
-                json_objects = [line.strip() for line in content.strip().split('\n') if line.strip()]
+            content = part_files[0][1].strip()
+            if '\n' in content:
+                outfile.write('[')
+                json_objects = [line.strip() for line in content.split('\n') if line.strip()]
                 outfile.write(','.join(json_objects))
-            outfile.write(']')
+                outfile.write(']')
+            else:
+                outfile.write(content)
     else:
         with open(output_file, 'w') as outfile:
             outfile.write('[')
