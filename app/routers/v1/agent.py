@@ -75,7 +75,14 @@ def spark_data_to_file(output_dir: str, output_file: str):
         return
 
     if len(part_files) == 1:
-        shutil.move(part_files[0][0], output_file)
+        with open(output_file, 'w') as outfile:
+            outfile.write('[')
+            for i, (_, content) in enumerate(part_files):
+                if i > 0:
+                    outfile.write(',')
+                json_objects = [line.strip() for line in content.strip().split('\n') if line.strip()]
+                outfile.write(','.join(json_objects))
+            outfile.write(']')
     else:
         with open(output_file, 'w') as outfile:
             outfile.write('[')
