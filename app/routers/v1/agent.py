@@ -46,14 +46,16 @@ async def call_executor(
 
     print(configured_script)
 
-    executor.execute_script(script=configured_script["script"])
+    res, err = executor.execute_script(script=configured_script["script"])
+    print(f"RESULT: \n{res}\n\n")
+    print(f"ERROR: \n{err}\n\n")
     
     output_dir = configured_script["output_dir"]
-    output_file = f"{output_dir}.json"
+    # output_file = f"{output_dir}.json"
+    # spark_data_to_file(output_dir, output_file)
+    # file_stream = open(output_file, mode="rb")
 
-    spark_data_to_file(output_dir, output_file)
-
-    file_stream = open(output_file, mode="rb")
+    file_stream = open(output_dir, mode="rb")
 
     return StreamingResponse(file_stream, media_type="application/json")
 

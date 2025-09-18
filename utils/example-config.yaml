@@ -1,15 +1,15 @@
 python:
-  env: "/Users/leonid/Documents/test/highkick/venv"
+  env: "/opt/aux-venv"
 
 output:
-  directory: "/Users/leonid/Documents/test/highkick/data"
+  directory: "/spark-data"
 
 secrets:
   access: "<access_token_secret>"
   service: "<service_token_secret>"
 
 spark:
-  host: "localhost"
+  host: "spark-master"
   port: 7077
 
 databases:
@@ -19,6 +19,6 @@ databases:
       - test_db1_name: "sparkdb"
       - test_db1_user: "sparkuser"
       - test_db1_password: "sparkpass"
-      - test_db1_host: "localhost"
-      - test_db1_port: 9432
+      - test_db1_host: "postgres"
+      - test_db1_port: 5432
 
