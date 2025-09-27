@@ -16,7 +16,7 @@ ENV AUX_VENV=/opt/aux-venv
 RUN python -m venv $AUX_VENV && \
     $AUX_VENV/bin/pip install --no-cache-dir --upgrade pip && \
     # PySpark needs a JDK (installed above). Install Postgres driver in this venv too.
-    $AUX_VENV/bin/pip install --no-cache-dir "pyspark==4.0.0" "psycopg[binary]"
+    $AUX_VENV/bin/pip install --no-cache-dir "pyspark==4.0.0" "psycopg[binary]" "psycopg2-binary"
 # (Optional) leave a helper to enter this venv when you shell in:
 # RUN printf '#!/bin/sh\n. $AUX_VENV/bin/activate\nexec "$@"\n' > /usr/local/bin/aux-venv && chmod +x /usr/local/bin/aux-venv
 # --- End: auxiliary venv ---

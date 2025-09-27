@@ -22,3 +22,12 @@ databases:
       - test_db1_host: "postgres"
       - test_db1_port: 5432
 
+  - name: "Shop sales DB"
+    tech: "PostgreSQL"
+    vars:
+      - test_db2_name: "postgres"
+      - test_db2_user: "postgres"
+      - test_db2_password: "gURH%gaNczV$WfcwGj(gQ"
+      - test_db2_host: "online-retail-test.cv62km2c08to.eu-north-1.rds.amazonaws.com"
+      - test_db2_port: 5432
+
