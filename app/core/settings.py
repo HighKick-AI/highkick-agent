@@ -6,10 +6,8 @@ from sqlalchemy import URL
 
 class AuthSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="AUTH_")
-
-    SECRET_KEY: str = "JL9s6YkzQp2WYV7uuWgu9EpV2HxpWU4xPYtcq2KCpqCdUaky97JFBszb5YKaQUMA"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 12
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
 class GitSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="GIT_")

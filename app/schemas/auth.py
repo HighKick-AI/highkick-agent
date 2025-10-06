@@ -1,8 +1,8 @@
 from app.schemas.base import BaseSchema
 
-class Token(BaseSchema):
+class AccessToken(BaseSchema):
     access_token: str
 
+class ServiceToken(BaseSchema):
+    service_token: str
 
-class TokenData(BaseSchema):
-    user_id: str | None = None

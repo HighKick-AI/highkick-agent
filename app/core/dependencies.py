@@ -13,6 +13,7 @@ from fastapi.requests import Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from starlette.requests import HTTPConnection
+import yaml
 
 from app.clients import BedrockClient, S3Client
 from app.clients.aws import AWSClient
@@ -110,31 +111,38 @@ def get_password_context():
 
 bearer_auth = HTTPBearer()
 
-# async def get_current_account(
-#         token: HTTPAuthorizationCredentials = Depends(bearer_auth),
-#         settings: AuthSettings = Depends(get_settings(AuthSettings)),
-#         account_repo: AccountRepo = Depends(get_repo(AccountRepo)),
-# ) -> Account:
-#     credentials_exception = HTTPException(
-#         status_code=status.HTTP_401_UNAUTHORIZED,
-#         detail="Could not validate credentials",
-#         headers={"WWW-Authenticate": "Bearer"},
-#     )
-#     try:
-#         payload = jwt.decode(token.credentials, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-#         user_id: str = payload.get("sub")
-#         if user_id is None:
-#             raise credentials_exception
-#     except InvalidTokenError:
-#         raise credentials_exception
-#     account = await account_repo.get_by_id(user_id)
-#     if account is None:
-#         raise credentials_exception
-#     return account
+def _load_config(path: str):
+    with open(path, "r") as f:
+        config = yaml.safe_load(f)
+    return config
 
-async def get_current_account(
-        request: Request,
+
+async def get_config_yaml(
+        agent_config: AgentConfig = Depends(get_settings(AgentConfig)),
+) -> dict:
+    return _load_config(agent_config.CONFIG_PATH)
+
+
+async def get_auth_access(
+        token: HTTPAuthorizationCredentials = Depends(bearer_auth),
         settings: AuthSettings = Depends(get_settings(AuthSettings)),
-        # account_repo: AccountRepo = Depends(get_repo(AccountRepo)),
-) -> str:
-    return "hello world"
+        agent_config: AgentConfig = Depends(get_settings(AgentConfig)),
+) -> dict:
+    
+    config_yaml = _load_config(agent_config.CONFIG_PATH)
+    secret = config_yaml["secrets"]["access"]
+
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        jwt.decode(token.credentials, secret, algorithms=[settings.ALGORITHM])
+    except InvalidTokenError:
+        raise credentials_exception
+    return {
+        "access": config_yaml["secrets"]["access"],
+        "service": config_yaml["secrets"]["service"]
+    }

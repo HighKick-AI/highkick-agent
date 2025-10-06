@@ -14,10 +14,9 @@ from fastapi.responses import StreamingResponse
 from fastapi import APIRouter, Depends, status, HTTPException, Response
 
 
-from app.core.dependencies import get_settings, get_executor
+from app.core.dependencies import get_settings, get_executor, get_auth_access
 from app.core.settings import AuthSettings
 from app.schemas.account import AccountConsumeSchema
-from app.schemas.auth import Token
 from app.schemas.error import ErrorSchema
 from app.service.executor import ExecutorService
 
@@ -40,6 +39,7 @@ router = APIRouter()
 async def call_executor(
     script: str = Body(..., media_type="text/plain"),
     executor: ExecutorService = Depends(get_executor),
+    auth: dict = Depends(get_auth_access),
 ) -> StreamingResponse:
     
     configured_script = executor.configure_script(script=script)
