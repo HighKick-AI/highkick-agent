@@ -31,3 +31,11 @@ databases:
       - test_db2_host: "online-retail-test.cv62km2c08to.eu-north-1.rds.amazonaws.com"
       - test_db2_port: 5432
 
+  - name: "Programmatic DB"
+    tech: "MySQL"
+    vars:
+      - test_db3_name: "brave_new"
+      - test_db3_user: "highkick"
+      - test_db3_password: "g29Zl5VxT7QcHKsR01G"
+      - test_db3_host: "88.214.193.70"
+      - test_db3_port: 3306

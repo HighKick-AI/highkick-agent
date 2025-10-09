@@ -11,14 +11,22 @@ RUN python -m pip install --upgrade pip
 
 
 # --- Begin: auxiliary venv (separate from the main app env) ---
-# Create an isolated venv just for PySpark & Postgres driver; don't modify PATH.
+# Create an isolated venv; don't modify PATH.
 ENV AUX_VENV=/opt/aux-venv
+
+# Create the virtual environment and upgrade pip
 RUN python -m venv $AUX_VENV && \
-    $AUX_VENV/bin/pip install --no-cache-dir --upgrade pip && \
-    # PySpark needs a JDK (installed above). Install Postgres driver in this venv too.
-    $AUX_VENV/bin/pip install --no-cache-dir "pyspark==4.0.0" "psycopg[binary]" "psycopg2-binary"
-# (Optional) leave a helper to enter this venv when you shell in:
+    $AUX_VENV/bin/pip install --no-cache-dir --upgrade pip
+
+# Install packages one by one to leverage Docker layer caching
+RUN $AUX_VENV/bin/pip install --no-cache-dir "pyspark==4.0.0"
+RUN $AUX_VENV/bin/pip install --no-cache-dir "psycopg[binary]"
+RUN $AUX_VENV/bin/pip install --no-cache-dir "psycopg2-binary"
+RUN $AUX_VENV/bin/pip install --no-cache-dir "PyMySQL"
+
+# (Optional) Helper script to enter this venv when you shell in
 # RUN printf '#!/bin/sh\n. $AUX_VENV/bin/activate\nexec "$@"\n' > /usr/local/bin/aux-venv && chmod +x /usr/local/bin/aux-venv
+
 # --- End: auxiliary venv ---
 
 
