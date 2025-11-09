@@ -12,6 +12,7 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 from fastapi import APIRouter, Depends, status, HTTPException, Response
+from fastapi.concurrency import run_in_threadpool
 
 
 from app.core.dependencies import get_settings, get_executor, get_auth_access
@@ -46,7 +47,11 @@ async def call_executor(
 
     print(configured_script)
 
-    res, err = executor.execute_script(script=configured_script["script"])
+    res, err = await run_in_threadpool(
+        executor.execute_script,
+        script=configured_script["script"]
+    )
+
     print(f"RESULT: \n{res}\n\n")
     print(f"ERROR: \n{err}\n\n")
     

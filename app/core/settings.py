@@ -54,7 +54,7 @@ class Settings(BaseSettings):
 
     ENVIRONMENT_NAME: Literal["local", "dev", "main"] = "local"
 
-    SERVICE_NAME: str = "HIGHKICK DASHBOARD"
+    SERVICE_NAME: str = "HIGHKICK AGENT"
     SERVICE_VERSION: str = "0.1.0"
     SERVICE_HOST: str = "0.0.0.0"
     SERVICE_PORT: int = 9900
