@@ -37,7 +37,7 @@ class ExecutorService:
         return config
 
 
-    def configure_script(self, script: str) -> str:
+    def configure_script(self, script: str, output_file_path: str) -> str:
         databases = self._config_yaml["databases"]
         result = script
         for db in databases:
@@ -49,14 +49,13 @@ class ExecutorService:
                 result = result.replace("{{" + key + "}}", str(val))
 
         ## Name of the spark output directory
-        dirname = os.path.join(self._output_dir, f"{str(uuid.uuid4())}")
-        result = result.replace("{{output_file}}", dirname)
+        result = result.replace("{{output_file}}", output_file_path)
         result = result.replace("{{spark_host}}", self._spark_host)
         result = result.replace("{{spark_port}}", str(self._spark_port))
 
         return {
             "script": result,
-            "output_dir": dirname
+            "output_file": output_file_path
         }
 
 
@@ -71,8 +70,12 @@ class ExecutorService:
             result = subprocess.run(
                 [python_bin, tmp_file_path],
                 capture_output=True,
-                text=True
+                text=True,
+                timeout=60 * 10
             )
             return result.stdout, result.stderr
         finally:
             os.remove(tmp_file_path)
+
+    def get_output_dir(self) -> str:
+        return self._output_dir

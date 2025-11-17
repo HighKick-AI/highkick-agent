@@ -1,6 +1,7 @@
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.task_pool import AsyncTaskPool, close_task_pool, init_task_pool
 from app.core.settings import Settings
 from app.routers import system
 from app.routers.v1 import provide_api_v1_router
@@ -25,6 +26,9 @@ def provide_app(settings: Settings) -> FastAPI:
         allow_headers=["*"],
     )
 
+    app.add_event_handler("startup", init_task_pool(app))
+    app.add_event_handler("shutdown", close_task_pool(app))
+    
     app.state.settings = settings
 
     app.include_router(system.router)

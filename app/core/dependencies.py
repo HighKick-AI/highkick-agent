@@ -37,6 +37,8 @@ from jwt.exceptions import InvalidTokenError
 
 from passlib.context import CryptContext
 
+from core.task_pool import AsyncTaskPool
+
 if TYPE_CHECKING:
     from types_aiobotocore_s3 import S3Client as S3ClientBoto
 
@@ -62,6 +64,8 @@ def get_executor(
 ) -> ExecutorService:
     return ExecutorService(agent_config=agent_config)
 
+def get_task_pool(request: HTTPConnection) -> AsyncTaskPool:
+    return request.app.state.task_pool
 
 def get_aws_client(service_name: ServiceName, **kwargs: Any) -> Callable:
     async def _get_client(request: Request) -> AsyncGenerator:

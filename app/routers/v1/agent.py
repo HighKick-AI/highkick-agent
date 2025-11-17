@@ -1,3 +1,5 @@
+from subprocess import TimeoutExpired
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List
 import json
@@ -15,9 +17,12 @@ from fastapi import APIRouter, Depends, status, HTTPException, Response
 from fastapi.concurrency import run_in_threadpool
 
 
-from app.core.dependencies import get_settings, get_executor, get_auth_access
+from app.core.task_pool import AsyncTaskPool
+from app.core.dependencies import get_settings, get_executor, get_auth_access, get_task_pool
+from app.core.agent_job import AgentJob
+from app.core.exceptions import NotFoundException
 from app.core.settings import AuthSettings
-from app.schemas.account import AccountConsumeSchema
+from app.schemas.agent import JobProduceSchema, StatusSchema
 from app.schemas.error import ErrorSchema
 from app.service.executor import ExecutorService
 
@@ -27,7 +32,8 @@ from passlib.context import CryptContext
 router = APIRouter()
 
 @router.post(
-    "/script",
+    "/jobs",
+    response_model=JobProduceSchema,
     status_code=status.HTTP_200_OK,
     name="accounts",
     responses={
@@ -37,67 +43,152 @@ router = APIRouter()
         },
     },
 )
-async def call_executor(
+async def start_job(
     script: str = Body(..., media_type="text/plain"),
+    executor: ExecutorService = Depends(get_executor),
+    task_pool: AsyncTaskPool = Depends(get_task_pool),
+    auth: dict = Depends(get_auth_access),
+) -> JobProduceSchema:
+    
+    job = AgentJob(base_dir=executor.get_output_dir(), id=str(uuid.uuid4()))
+    job.set_status(StatusSchema())
+
+    task_pool.add_task(
+        run_job,
+        job=job,
+        executor=executor,
+        script=script
+    )    
+    
+    return JobProduceSchema(id=job.get_id())
+
+
+async def run_job(job: AgentJob, executor: ExecutorService, script: str):
+    
+    configured_script = executor.configure_script(script=script, output_file_path=job.get_data_path_str())
+
+    status = StatusSchema()
+    status.time_started = datetime.now()
+    job.set_status(status)
+
+    try:
+        std_out, err = await run_in_threadpool(
+            executor.execute_script,
+            script=configured_script["script"]
+        )
+    except TimeoutExpired as e:
+        std_out = ""
+        err = f"Timeout expired after {e.timeout} seconds"
+
+    finally:
+        pass
+
+    status.time_completed = datetime.now()
+    status.error = not (not err or err.strip() == "")
+
+    job.set_std_output(std_out)
+    job.set_error(err)        
+
+    job.set_status(status)
+
+
+@router.get(
+    "/jobs/{job_id}/status",
+    response_model=StatusSchema,
+    status_code=status.HTTP_200_OK,
+    name="Get job status",
+    responses={
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "model": ErrorSchema,
+            "description": "Unknown error",
+        },
+    },
+)
+async def get_job_status(
+    job_id: str,
+    executor: ExecutorService = Depends(get_executor),
+    auth: dict = Depends(get_auth_access),
+) -> StatusSchema:
+    job = AgentJob(base_dir=executor.get_output_dir(), id=job_id)
+    status = job.get_status()
+    if status is None:
+        raise NotFoundException()
+    return status
+
+
+@router.get(
+    "/jobs/{job_id}/data",
+    status_code=status.HTTP_200_OK,
+    name="Get output data",
+    responses={
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "model": ErrorSchema,
+            "description": "Unknown error",
+        },
+    },
+)
+async def get_job_data(
+    job_id: str,
     executor: ExecutorService = Depends(get_executor),
     auth: dict = Depends(get_auth_access),
 ) -> StreamingResponse:
+    job = AgentJob(base_dir=executor.get_output_dir(), id=job_id)
+    path = job.get_data_path()
+    if path is None:
+        raise NotFoundException()
     
-    configured_script = executor.configure_script(script=script)
-
-    print(configured_script)
-
-    res, err = await run_in_threadpool(
-        executor.execute_script,
-        script=configured_script["script"]
-    )
-
-    print(f"RESULT: \n{res}\n\n")
-    print(f"ERROR: \n{err}\n\n")
-    
-    output_dir = configured_script["output_dir"]
-    # output_file = f"{output_dir}.json"
-    # spark_data_to_file(output_dir, output_file)
-    # file_stream = open(output_file, mode="rb")
-
-    file_stream = open(output_dir, mode="rb")
-
+    file_stream = open(path, mode="rb")
     return StreamingResponse(file_stream, media_type="application/json")
 
 
-def spark_data_to_file(output_dir: str, output_file: str):
-    part_files = []
-    for filename in os.listdir(output_dir):
-        if filename.startswith("part-") and filename.endswith(".json"):
-            part_file = os.path.join(output_dir, filename)
-            try:
-                with open(part_file, 'r') as f:
-                    content = f.read()
-                    part_files.append((part_file, content))
-            except (IOError, OSError) as e:
-                print(f"Error reading file {part_file}: {str(e)}")
-                continue
 
-    if not part_files:
-        return
+@router.get(
+    "/jobs/{job_id}/std-output",
+    status_code=status.HTTP_200_OK,
+    name="Get std output",
+    responses={
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "model": ErrorSchema,
+            "description": "Unknown error",
+        },
+    },
+)
+async def get_std_output(
+    job_id: str,
+    executor: ExecutorService = Depends(get_executor),
+    auth: dict = Depends(get_auth_access),
+) -> StreamingResponse:
+    job = AgentJob(base_dir=executor.get_output_dir(), id=job_id)
+    path = job.get_std_output_path()
+    if path is None:
+        raise NotFoundException()
+    
+    file_stream = open(path, mode="rb")
+    return StreamingResponse(file_stream, media_type="text/plain")
+    
 
-    if len(part_files) == 1:
-        with open(output_file, 'w') as outfile:
-            content = part_files[0][1].strip()
-            if '\n' in content:
-                outfile.write('[')
-                json_objects = [line.strip() for line in content.split('\n') if line.strip()]
-                outfile.write(','.join(json_objects))
-                outfile.write(']')
-            else:
-                outfile.write(content)
-    else:
-        with open(output_file, 'w') as outfile:
-            outfile.write('[')
-            for i, (_, content) in enumerate(part_files):
-                if i > 0:
-                    outfile.write(',')
-                outfile.write(content.strip())
-            outfile.write(']')
 
-    shutil.rmtree(output_dir, ignore_errors=True)
+@router.get(
+    "/jobs/{job_id}/error",
+    status_code=status.HTTP_200_OK,
+    name="Get error",
+    responses={
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "model": ErrorSchema,
+            "description": "Unknown error",
+        },
+    },
+)
+async def get_error(
+    job_id: str,
+    executor: ExecutorService = Depends(get_executor),
+    auth: dict = Depends(get_auth_access),
+) -> StreamingResponse:
+    job = AgentJob(base_dir=executor.get_output_dir(), id=job_id)
+    path = job.get_error_path()
+    if path is None:
+        raise NotFoundException()
+    
+    file_stream = open(path, mode="rb")
+    return StreamingResponse(file_stream, media_type="text/plain")
+    
