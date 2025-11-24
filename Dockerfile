@@ -1,9 +1,9 @@
-# Base with Python 3.13
-FROM python:3.13-slim
+# Base with Python 3.11 as more stable with ML libs
+FROM python:3.12-slim
 
 # Install latest JDK available for this distro and make
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends default-jdk make && \
+    apt-get install -y --no-install-recommends default-jdk gcc g++ make && \
     rm -rf /var/lib/apt/lists/*
 
 # Ensure pip stays modern
@@ -41,6 +41,11 @@ COPY pyproject.toml poetry.lock* /app/
 # Install dependencies (no project install yet)
 RUN poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi --no-root
+
+RUN pip install --no-cache-dir setuptools wheel
+
+COPY prediction.txt .
+RUN pip install --no-cache-dir -r prediction.txt
 
 COPY . /app
 
