@@ -1,0 +1,23 @@
+python:
+  env: "/opt/aux-venv"
+
+output:
+  directory: "/output-data"
+
+secrets:
+  access: "<access_token_secret>"
+  service: "<service_token_secret>"
+
+spark:
+  host: "spark-master"
+  port: 7077
+
+databases:
+  - name: "Example DB"
+    tech: "PostgreSQL"
+    vars:
+      - example_db_name: "postgres"
+      - example_db_user: "postgres"
+      - example_db_password: "some-pass"
+      - example_db_host: "postgres"
+      - example_db_port: 5432

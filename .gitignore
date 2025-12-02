@@ -165,3 +165,6 @@ cython_debug/
 #.idea/
 
 generate_questions.py
+
+output-data/
+

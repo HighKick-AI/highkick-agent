@@ -6,6 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      CONFIG_PATH: /app/utils/example-config.yaml
+      CONFIG_PATH: /app/config/config.yaml
     ports:
       - "9900:9900"
+    volumes:
+      - ./example-config.yaml:/app/config/config.yaml:ro
+      - ./output-data:/output-data
