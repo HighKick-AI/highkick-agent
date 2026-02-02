@@ -6,11 +6,9 @@ output:
 
 secrets:
   access: "<access_token_secret>"
-  service: "<service_token_secret>"
 
-spark:
-  host: "spark-master"
-  port: 7077
+admin:
+  public_key: "cDGjkkwr6kQP9zysF3qn1b648M3nd3npWV-HmxhO8i0"
 
 databases:
   - name: "Example DB"

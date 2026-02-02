@@ -17,34 +17,9 @@ from app.schemas.error import ErrorSchema
 import jwt
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
+from core.crypto import Crypto
 
 router = APIRouter()
-
-# @router.get(
-#     "/debug/service-token",
-#     response_model=ServiceToken,
-#     status_code=status.HTTP_200_OK,
-#     name="generate debug service token",
-#     responses={
-#         status.HTTP_500_INTERNAL_SERVER_ERROR: {
-#             "model": ErrorSchema,
-#             "description": "Unknown error",
-#         },
-#     },
-# )
-# async def create_debug_service_token(
-#     settings: AuthSettings = Depends(get_settings(AuthSettings)),
-#     config_yaml: dict = Depends(get_config_yaml),
-# ) -> ServiceToken:
-    
-#     token = ServiceToken(
-#         service_token=create_token(
-#             secret=config_yaml["secrets"]["service"],
-#             algorithm=settings.ALGORITHM,
-#             expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-#         )
-#     )
-#     return token
 
 
 @router.post(
@@ -72,7 +47,10 @@ async def create_access_token(
     )
     
     try:
-        jwt.decode(token.service_token, config_yaml["secrets"]["service"], algorithms=[settings.ALGORITHM])
+        Crypto.validate_token(
+            token=token.service_token,
+            public_key=config_yaml["admin"]["public_key"]
+        )
     except InvalidTokenError:
         raise credentials_exception
 
