@@ -147,6 +147,5 @@ async def get_auth_access(
     except InvalidTokenError:
         raise credentials_exception
     return {
-        "access": config_yaml["secrets"]["access"],
-        "service": config_yaml["secrets"]["service"]
+        "access": config_yaml["secrets"]["access"]
     }
