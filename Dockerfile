@@ -23,6 +23,7 @@ RUN $AUX_VENV/bin/pip install --no-cache-dir "pyspark==4.0.0"
 RUN $AUX_VENV/bin/pip install --no-cache-dir "psycopg[binary]"
 RUN $AUX_VENV/bin/pip install --no-cache-dir "psycopg2-binary"
 RUN $AUX_VENV/bin/pip install --no-cache-dir "PyMySQL"
+RUN $AUX_VENV/bin/pip install --no-cache-dir "pymongo"
 
 # (Optional) Helper script to enter this venv when you shell in
 # RUN printf '#!/bin/sh\n. $AUX_VENV/bin/activate\nexec "$@"\n' > /usr/local/bin/aux-venv && chmod +x /usr/local/bin/aux-venv
