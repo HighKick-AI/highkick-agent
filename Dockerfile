@@ -19,6 +19,7 @@ RUN python -m venv $AUX_VENV && \
     $AUX_VENV/bin/pip install --no-cache-dir --upgrade pip
 
 # Install packages one by one to leverage Docker layer caching
+RUN $AUX_VENV/bin/pip install --no-cache-dir "requests"
 RUN $AUX_VENV/bin/pip install --no-cache-dir "pyspark==4.0.0"
 RUN $AUX_VENV/bin/pip install --no-cache-dir "psycopg[binary]"
 RUN $AUX_VENV/bin/pip install --no-cache-dir "psycopg2-binary"

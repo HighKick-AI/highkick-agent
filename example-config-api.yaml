@@ -1,0 +1,18 @@
+python:
+  env: "/opt/aux-venv"
+
+output:
+  directory: "/output-data"
+
+secrets:
+  access: "<access_token_secret_xbski>"
+
+admin:
+  public_key: "Hh8dMTKBRhoZbOO9uynVauO_uGSwkeZUPN6gIgHqq7w"
+
+databases:
+  - name: "Syrve-API"
+    tech: "REST API"
+    vars:
+      - api_login: "login"
+      - api_password: "password"
