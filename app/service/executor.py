@@ -29,7 +29,9 @@ class ExecutorService:
         with open(path, "r") as f:
             config = yaml.safe_load(f)
         return config
-
+    
+    def get_config_yaml(self) -> dict:
+        return self._config_yaml
 
     def configure_script(self, script: str, output_file_path: str) -> str:
         databases = self._config_yaml["databases"]

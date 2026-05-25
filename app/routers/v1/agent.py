@@ -22,7 +22,7 @@ from app.core.dependencies import get_settings, get_executor, get_auth_access, g
 from app.core.agent_job import AgentJob
 from app.core.exceptions import NotFoundException
 from app.core.settings import AuthSettings
-from app.schemas.agent import JobProduceSchema, StatusSchema
+from app.schemas.agent import JobProduceSchema, StatusSchema, DatabaseSchema
 from app.schemas.error import ErrorSchema
 from app.service.executor import ExecutorService
 
@@ -192,3 +192,38 @@ async def get_error(
     file_stream = open(path, mode="rb")
     return StreamingResponse(file_stream, media_type="text/plain")
     
+
+@router.get(
+    "/databases",
+    response_model=List[DatabaseSchema],
+    status_code=status.HTTP_200_OK,
+    name="get databases",
+    responses={
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "model": ErrorSchema,
+            "description": "Unknown error",
+        },
+    },
+)
+async def get_job_status(
+    executor: ExecutorService = Depends(get_executor),
+    auth: dict = Depends(get_auth_access),
+) -> List[DatabaseSchema]:
+    yaml = executor.get_config_yaml()
+
+    databases = []
+    for db in yaml["databases"]:
+
+        vars = []
+        for item in db["vars"]:
+            for key, value in item.items():
+                vars.append(key)
+
+        database = DatabaseSchema(
+            name=db["name"],
+            tech=db["tech"],
+            vars=vars
+        )
+        databases.append(database)
+
+    return databases
