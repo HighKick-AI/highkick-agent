@@ -205,7 +205,7 @@ async def get_error(
         },
     },
 )
-async def get_job_status(
+async def get_databases(
     executor: ExecutorService = Depends(get_executor),
     auth: dict = Depends(get_auth_access),
 ) -> List[DatabaseSchema]:
