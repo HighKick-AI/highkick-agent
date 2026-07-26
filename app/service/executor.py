@@ -51,6 +51,21 @@ class ExecutorService:
             "script": result,
             "output_file": output_file_path
         }
+    
+    def configure_script_with_params(self, script: str, output_file_path: str, params: dict) -> str:
+        databases = self._config_yaml["databases"]
+        result = script
+
+        for key in params:
+            val = params[key]
+            result = result.replace("{{" + key + "}}", str(val))
+
+        result = result.replace("{{output_file}}", output_file_path)
+
+        return {
+            "script": result,
+            "output_file": output_file_path
+        }
 
 
     def execute_script(self, script: str) -> Tuple[str, str]:

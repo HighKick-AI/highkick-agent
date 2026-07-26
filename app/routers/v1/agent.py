@@ -22,7 +22,7 @@ from app.core.dependencies import get_settings, get_executor, get_auth_access, g
 from app.core.agent_job import AgentJob
 from app.core.exceptions import NotFoundException
 from app.core.settings import AuthSettings
-from app.schemas.agent import JobProduceSchema, StatusSchema, DatabaseSchema
+from app.schemas.agent import JobProduceSchema, StatusSchema, DatabaseSchema, JobParamsSchema
 from app.schemas.error import ErrorSchema
 from app.service.executor import ExecutorService
 
@@ -63,9 +63,45 @@ async def start_job(
     return JobProduceSchema(id=job.get_id())
 
 
-async def run_job(job: AgentJob, executor: ExecutorService, script: str):
+@router.post(
+    "/jobs/with-params",
+    response_model=JobProduceSchema,
+    status_code=status.HTTP_200_OK,
+    name="accounts",
+    responses={
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "model": ErrorSchema,
+            "description": "Unknown error",
+        },
+    },
+)
+async def start_job_with_params(
+    params: JobParamsSchema,
+    executor: ExecutorService = Depends(get_executor),
+    task_pool: AsyncTaskPool = Depends(get_task_pool),
+    auth: dict = Depends(get_auth_access),
+) -> JobProduceSchema:
     
-    configured_script = executor.configure_script(script=script, output_file_path=job.get_data_path_str())
+    job = AgentJob(base_dir=executor.get_output_dir(), id=str(uuid.uuid4()))
+    job.set_status(StatusSchema())
+
+    task_pool.add_task(
+        run_job,
+        job=job,
+        executor=executor,
+        script=params.script,
+        params=params.params
+    )    
+    
+    return JobProduceSchema(id=job.get_id())
+
+
+async def run_job(job: AgentJob, executor: ExecutorService, script: str, params: dict = None):
+    
+    if params is None:
+        configured_script = executor.configure_script(script=script, output_file_path=job.get_data_path_str())
+    else:
+        configured_script = executor.configure_script_with_params(script=script, output_file_path=job.get_data_path_str(), params=params)
 
     status = StatusSchema()
     status.time_started = datetime.now()

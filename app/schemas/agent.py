@@ -21,3 +21,7 @@ class DatabaseSchema(BaseSchema):
     name: Optional[str] = None
     tech: Optional[str] = None
     vars: list[str] = None
+
+class JobParamsSchema(BaseSchema):
+    script: str = None
+    params: dict = None
