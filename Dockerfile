@@ -26,6 +26,11 @@ RUN $AUX_VENV/bin/pip install --no-cache-dir "psycopg2-binary"
 RUN $AUX_VENV/bin/pip install --no-cache-dir "PyMySQL"
 RUN $AUX_VENV/bin/pip install --no-cache-dir "pymongo"
 
+RUN $AUX_VENV/bin/pip install --no-cache-dir "google-auth"
+RUN $AUX_VENV/bin/pip install --no-cache-dir "google-api-python-client"
+RUN $AUX_VENV/bin/pip install --no-cache-dir "google-auth-httplib2"
+RUN $AUX_VENV/bin/pip install --no-cache-dir "gspread"
+
 # (Optional) Helper script to enter this venv when you shell in
 # RUN printf '#!/bin/sh\n. $AUX_VENV/bin/activate\nexec "$@"\n' > /usr/local/bin/aux-venv && chmod +x /usr/local/bin/aux-venv
 
